@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MediaKind {
+  movie
+  series
+}
+
+model User {
+  id           String   @id @default(uuid())
+  displayName  String
+  email        String   @unique
+  passwordHash String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  medias       Media[]
+}
+
+model Media {
+  id             String    @id @default(uuid())
+  titulo         String
+  tituloOriginal String
+  subtitulo      String
+  sinopse        String
+  generos        String[]
+  popularidade   String
+  votos          String
+  rating         Float
+  lancamento     String
+  duracao        String
+  situacao       String
+  idioma         String
+  orcamento      String
+  receita        String
+  lucro          String
+  posterUrl      String
+  kind           MediaKind
+  backgroundUrl  String
+  teaserUrl      String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  createdById    String
+  createdBy      User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+}
