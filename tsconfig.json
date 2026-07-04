@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "paths": {
+      "@tato-streaming/shared": ["../shared/dist/index.js"]
+    },
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,

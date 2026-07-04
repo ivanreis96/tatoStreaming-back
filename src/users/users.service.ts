@@ -5,6 +5,7 @@ type CreateUserInput = {
   displayName: string;
   email: string;
   passwordHash: string;
+  refreshTokenHash?: string | null;
   avatarUrl?: string;
 };
 
@@ -18,6 +19,13 @@ export class UsersService {
 
   findById(id: string) {
     return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  updateRefreshTokenHash(id: string, refreshTokenHash: string | null) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { refreshTokenHash },
+    });
   }
 
   create(input: CreateUserInput) {

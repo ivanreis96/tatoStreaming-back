@@ -6,7 +6,12 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
 import { UsersService } from '../users/users.service';
-import { LoginDto, RegisterDto } from './dto/auth.schemas';
+import type { AuthSession, LoginDto, RefreshTokenDto, RegisterDto, UserProfile } from './dto/auth.schemas';
+
+type JwtPayload = {
+  sub: string;
+  email: string;
+};
 
 @Injectable()
 export class AuthService {
@@ -15,7 +20,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto): Promise<AuthSession> {
     const existingUser = await this.usersService.findByEmail(dto.email);
 
     if (existingUser) {
@@ -38,7 +43,7 @@ export class AuthService {
     );
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto): Promise<AuthSession> {
     const user = await this.usersService.findByEmail(dto.email);
 
     if (!user) {
@@ -51,7 +56,47 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais invalidas.');
     }
 
-    return this.createSession(user.id, user.email, user.displayName, user.avatarUrl ?? undefined);
+    return this.createSession(
+      user.id,
+      user.email,
+      user.displayName,
+      user.avatarUrl ?? undefined,
+    );
+  }
+
+  async refresh(dto: RefreshTokenDto): Promise<AuthSession> {
+    const payload = await this.jwtService.verifyAsync<JwtPayload>(dto.refreshToken, {
+      secret: this.getRefreshSecret(),
+    });
+
+    const user = await this.usersService.findById(payload.sub);
+
+    if (!user?.refreshTokenHash) {
+      throw new UnauthorizedException('Refresh token invalido.');
+    }
+
+    const refreshTokenMatches = await compare(dto.refreshToken, user.refreshTokenHash);
+
+    if (!refreshTokenMatches) {
+      throw new UnauthorizedException('Refresh token invalido.');
+    }
+
+    return this.createSession(
+      user.id,
+      user.email,
+      user.displayName,
+      user.avatarUrl ?? undefined,
+    );
+  }
+
+  async me(userId: string): Promise<UserProfile> {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario nao encontrado.');
+    }
+
+    return this.toUserProfile(user.id, user.email, user.displayName, user.avatarUrl ?? undefined);
   }
 
   private async createSession(
@@ -59,25 +104,42 @@ export class AuthService {
     email: string,
     displayName: string,
     avatarUrl?: string,
-  ) {
+  ): Promise<AuthSession> {
     const payload = { sub: userId, email };
     const accessToken = await this.jwtService.signAsync(payload, {
       expiresIn: '15m',
     });
     const refreshToken = await this.jwtService.signAsync(payload, {
       expiresIn: '7d',
+      secret: this.getRefreshSecret(),
     });
+
+    const refreshTokenHash = await hash(refreshToken, 10);
+    await this.usersService.updateRefreshTokenHash(userId, refreshTokenHash);
 
     return {
       accessToken,
       refreshToken,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-      user: {
-        id: userId,
-        email,
-        displayName,
-        avatarUrl,
-      },
+      user: this.toUserProfile(userId, email, displayName, avatarUrl),
     };
+  }
+
+  private toUserProfile(
+    id: string,
+    email: string,
+    displayName: string,
+    avatarUrl?: string,
+  ): UserProfile {
+    return {
+      id,
+      email,
+      displayName,
+      avatarUrl,
+    };
+  }
+
+  private getRefreshSecret() {
+    return process.env.JWT_REFRESH_SECRET ?? process.env.JWT_SECRET ?? 'dev_jwt_secret';
   }
 }

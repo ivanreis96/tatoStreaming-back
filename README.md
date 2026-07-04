@@ -1,98 +1,134 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Tato Streaming - Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST do projeto Tato Streaming, desenvolvida com NestJS + Prisma + PostgreSQL.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Contexto do Projeto
 
-## Description
+Este repositorio representa a camada de servidor da aplicacao, com foco em:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- autenticacao (registro, login, refresh e usuario autenticado)
+- gestao de midias (CRUD de filmes/series)
+- persistencia em banco PostgreSQL
 
-## Project setup
+No workspace maior, este backend se relaciona com:
 
-```bash
-$ npm install
+- `../front/tatoStreaming-front`: aplica a experiencia web e consome esta API.
+- `../shared`: pacote compartilhado para contratos e schemas reutilizaveis entre camadas.
+
+## Endpoints Base
+
+O servidor sobe na porta `3000` por padrao e usa prefixo global `api`.
+
+Base URL local:
+
+```text
+http://localhost:3000/api
 ```
 
-## Compile and run the project
+Principais rotas:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/refresh`
+- `GET /api/auth/me`
+- `GET /api/media`
+- `GET /api/media/:id`
+- `POST /api/media`
+- `PATCH /api/media/:id`
+- `DELETE /api/media/:id`
+
+## Stack
+
+- NestJS 11
+- Prisma
+- PostgreSQL
+- JWT (access + refresh token)
+- Zod (validacao de DTOs)
+
+## Requisitos
+
+- Node.js 20+ (recomendado)
+- npm 10+ (recomendado)
+- PostgreSQL rodando localmente
+
+## Setup Passo a Passo
+
+### 1) Build do pacote shared
+
+Este backend declara dependencia local para `@tato-streaming/shared` usando `file:../shared`.
+
+No terminal, a partir da pasta raiz do workspace (`tato-streaming`):
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cd shared
+npm install
+npm run build
 ```
 
-## Run tests
+### 2) Instalar dependencias do backend
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd ../back/tatoStreaming-back
+npm install
 ```
 
-## Deployment
+### 3) Configurar variaveis de ambiente
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Copie o arquivo de exemplo:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cp .env.example .env
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+No Windows PowerShell, alternativa:
 
-## Resources
+```powershell
+Copy-Item .env.example .env
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Valores esperados em `.env`:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/tato_streaming?schema=public"
+JWT_SECRET="troque_para_um_segredo_forte"
+JWT_REFRESH_SECRET="troque_para_um_refresh_segredo_forte"
+PORT=3000
+```
 
-## Support
+### 4) Preparar banco com Prisma
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm run prisma:generate
+npm run prisma:migrate
+```
 
-## Stay in touch
+Opcional para inspecionar dados:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npm run prisma:studio
+```
 
-## License
+### 5) Rodar a API
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run start:dev
+```
+
+## Scripts Principais
+
+- `npm run start:dev`: sobe API com watch.
+- `npm run start`: sobe API em modo padrao.
+- `npm run build`: gera dist para producao.
+- `npm run start:prod`: executa build em producao.
+- `npm run lint`: executa lint com correcao.
+- `npm run test`: testes unitarios.
+- `npm run test:e2e`: testes end-to-end.
+
+## Integracao com as Outras Partes
+
+- O frontend deve apontar para este backend via `VITE_API_BASE_URL`.
+- O pacote shared concentra contratos para evitar divergencia entre payloads e validacoes.
+- Ordem recomendada para desenvolvimento local:
+  1. `shared` (build)
+  2. `back` (API + banco)
+  3. `front` (UI)
