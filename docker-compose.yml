@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: tato_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tato_streaming
+    ports:
+      - "5432:5432"
+    volumes:
+      - tato_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  tato_postgres_data:

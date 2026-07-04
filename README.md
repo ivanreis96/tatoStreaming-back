@@ -4,20 +4,20 @@ API REST do projeto Tato Streaming, desenvolvida com NestJS + Prisma + PostgreSQ
 
 ## Contexto do Projeto
 
-Este repositorio representa a camada de servidor da aplicacao, com foco em:
+Este repositório representa a camada de servidor da aplicação, com foco em:
 
-- autenticacao (registro, login, refresh e usuario autenticado)
-- gestao de midias (CRUD de filmes/series)
-- persistencia em banco PostgreSQL
+- autenticação (registro, login, refresh e usuário autenticado)
+- gestão de mídias (CRUD de filmes/séries)
+- persistência em banco PostgreSQL
 
 No workspace maior, este backend se relaciona com:
 
-- `../front/tatoStreaming-front`: aplica a experiencia web e consome esta API.
-- `../shared`: pacote compartilhado para contratos e schemas reutilizaveis entre camadas.
+- `../front/tatoStreaming-front`: aplica a experiência web e consome esta API.
+- `../shared`: pacote compartilhado para contratos e schemas reutilizáveis entre camadas.
 
 ## Endpoints Base
 
-O servidor sobe na porta `3000` por padrao e usa prefixo global `api`.
+O servidor sobe na porta `3000` por padrão e usa prefixo global `api`.
 
 Base URL local:
 
@@ -43,19 +43,19 @@ Principais rotas:
 - Prisma
 - PostgreSQL
 - JWT (access + refresh token)
-- Zod (validacao de DTOs)
+- Zod (validação de DTOs)
 
 ## Requisitos
 
 - Node.js 20+ (recomendado)
 - npm 10+ (recomendado)
-- PostgreSQL rodando localmente
+- PostgreSQL acessível (local, Docker ou nuvem)
 
 ## Setup Passo a Passo
 
 ### 1) Build do pacote shared
 
-Este backend declara dependencia local para `@tato-streaming/shared` usando `file:../shared`.
+Este backend declara dependência local para `@tato-streaming/shared` usando `file:../shared`.
 
 No terminal, a partir da pasta raiz do workspace (`tato-streaming`):
 
@@ -65,14 +65,14 @@ npm install
 npm run build
 ```
 
-### 2) Instalar dependencias do backend
+### 2) Instalar dependências do backend
 
 ```bash
 cd ../back/tatoStreaming-back
 npm install
 ```
 
-### 3) Configurar variaveis de ambiente
+### 3) Configurar variáveis de ambiente
 
 Copie o arquivo de exemplo:
 
@@ -114,6 +114,44 @@ npm run prisma:studio
 npm run start:dev
 ```
 
+## Setup do Banco com Docker
+
+Se preferir não instalar PostgreSQL diretamente na máquina, use o Docker Compose deste repositório.
+
+Arquivo:
+
+- `docker-compose.yml`
+
+### 1) Subir PostgreSQL
+
+Na pasta `back/tatoStreaming-back`:
+
+```bash
+docker-compose up -d
+```
+
+### 2) Confirmar variavel `DATABASE_URL`
+
+No arquivo `.env`, use:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/tato_streaming?schema=public"
+```
+
+### 3) Rodar Prisma
+
+```bash
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:studio
+```
+
+Comandos uteis:
+
+- Parar o banco: `docker-compose down`
+- Ver logs: `docker-compose logs -f postgres`
+- Reset completo (apaga dados do volume): `docker-compose down -v`
+
 ## Scripts Principais
 
 - `npm run start:dev`: sobe API com watch.
@@ -124,10 +162,10 @@ npm run start:dev
 - `npm run test`: testes unitarios.
 - `npm run test:e2e`: testes end-to-end.
 
-## Integracao com as Outras Partes
+## Integração com as Outras Partes
 
 - O frontend deve apontar para este backend via `VITE_API_BASE_URL`.
-- O pacote shared concentra contratos para evitar divergencia entre payloads e validacoes.
+- O pacote shared concentra contratos para evitar divergência entre payloads e validacoes.
 - Ordem recomendada para desenvolvimento local:
   1. `shared` (build)
   2. `back` (API + banco)
