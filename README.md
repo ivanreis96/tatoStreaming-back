@@ -146,7 +146,7 @@ npm run prisma:migrate
 npm run prisma:studio
 ```
 
-Comandos uteis:
+Comandos úteis:
 
 - Parar o banco: `docker-compose down`
 - Ver logs: `docker-compose logs -f postgres`
