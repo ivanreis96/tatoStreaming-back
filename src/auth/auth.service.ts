@@ -24,7 +24,7 @@ export class AuthService {
     const existingUser = await this.usersService.findByEmail(dto.email);
 
     if (existingUser) {
-      throw new ConflictException('Ja existe usuario com este e-mail.');
+      throw new ConflictException('Já existe usuário com este e-mail.');
     }
 
     const passwordHash = await hash(dto.password, 10);
@@ -47,13 +47,13 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email);
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais invalidas.');
+      throw new UnauthorizedException('Credenciais inválidas.');
     }
 
     const passwordMatches = await compare(dto.password, user.passwordHash);
 
     if (!passwordMatches) {
-      throw new UnauthorizedException('Credenciais invalidas.');
+      throw new UnauthorizedException('Credenciais inválidas.');
     }
 
     return this.createSession(
@@ -72,13 +72,13 @@ export class AuthService {
     const user = await this.usersService.findById(payload.sub);
 
     if (!user?.refreshTokenHash) {
-      throw new UnauthorizedException('Refresh token invalido.');
+      throw new UnauthorizedException('Refresh token inválido.');
     }
 
     const refreshTokenMatches = await compare(dto.refreshToken, user.refreshTokenHash);
 
     if (!refreshTokenMatches) {
-      throw new UnauthorizedException('Refresh token invalido.');
+      throw new UnauthorizedException('Refresh token inválido.');
     }
 
     return this.createSession(
@@ -93,7 +93,7 @@ export class AuthService {
     const user = await this.usersService.findById(userId);
 
     if (!user) {
-      throw new UnauthorizedException('Usuario nao encontrado.');
+      throw new UnauthorizedException('Usuário não encontrado.');
     }
 
     return this.toUserProfile(user.id, user.email, user.displayName, user.avatarUrl ?? undefined);
