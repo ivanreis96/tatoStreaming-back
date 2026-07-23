@@ -65,7 +65,7 @@ export class MediaService {
       message: 'Filme/serie excluido com sucesso.',
     };
   }
-
+ 
   private toMedia(media: {
     id: string;
     titulo: string;
@@ -78,7 +78,7 @@ export class MediaService {
     rating: number;
     lancamento: string;
     duracao: string;
-    situacao: string;
+    situacao: 'lancado' | 'producao' | 'encerrada' ;
     idioma: string;
     orcamento: string;
     receita: string;

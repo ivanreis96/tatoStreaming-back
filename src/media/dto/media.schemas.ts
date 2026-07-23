@@ -2,6 +2,7 @@ export {
   createMediaSchema,
   mediaIdParamSchema,
   mediaKindSchema,
+  mediaSituacaoSchema,
   mediaSchema,
   updateMediaSchema,
 } from '../../../../../shared/dist/index.js';
@@ -11,4 +12,5 @@ export type {
   MediaIdParamDto,
   MediaKind,
   UpdateMediaDto,
+  MediaSituacao
 } from '../../../../../shared/dist/index.js';

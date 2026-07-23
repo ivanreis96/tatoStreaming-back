@@ -12,6 +12,12 @@ enum MediaKind {
   series
 }
 
+enum MediaSituacao {
+  lancado
+  producao
+  encerrada
+}
+
 model User {
   id           String   @id @default(uuid())
   displayName  String
@@ -36,7 +42,7 @@ model Media {
   rating         Float
   lancamento     String
   duracao        String
-  situacao       String
+  situacao       MediaSituacao
   idioma         String
   orcamento      String
   receita        String

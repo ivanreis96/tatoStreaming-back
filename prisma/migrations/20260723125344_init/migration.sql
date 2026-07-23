@@ -1,8 +1,8 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
-
 -- CreateEnum
 CREATE TYPE "public"."MediaKind" AS ENUM ('movie', 'series');
+
+-- CreateEnum
+CREATE TYPE "public"."MediaSituacao" AS ENUM ('lancado', 'producao', 'encerrada');
 
 -- CreateTable
 CREATE TABLE "public"."User" (
@@ -31,7 +31,7 @@ CREATE TABLE "public"."Media" (
     "rating" DOUBLE PRECISION NOT NULL,
     "lancamento" TEXT NOT NULL,
     "duracao" TEXT NOT NULL,
-    "situacao" TEXT NOT NULL,
+    "situacao" "public"."MediaSituacao" NOT NULL,
     "idioma" TEXT NOT NULL,
     "orcamento" TEXT NOT NULL,
     "receita" TEXT NOT NULL,
