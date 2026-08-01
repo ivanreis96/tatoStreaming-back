@@ -1,32 +1,68 @@
 # Tato Streaming - Backend
 
-API REST do projeto Tato Streaming, desenvolvida com NestJS + Prisma + PostgreSQL.
+API REST do ecossistema Tato Streaming, construída com NestJS + Prisma + PostgreSQL.
 
-## Contexto do Projeto
+## Visão Geral
 
-Este repositório representa a camada de servidor da aplicação, com foco em:
+Este repositório concentra autenticação, usuários e CRUD de mídias.
 
-- autenticação (registro, login, refresh e usuário autenticado)
-- gestão de mídias (CRUD de filmes/séries)
-- persistência em banco PostgreSQL
+Relações no workspace:
+- `../front/tatoStreaming-front`: cliente web que consome esta API.
+- `../shared`: contratos de entrada/saída compartilhados.
 
-No workspace maior, este backend se relaciona com:
+## Stack
 
-- `../front/tatoStreaming-front`: aplica a experiência web e consome esta API.
-- `../shared`: pacote compartilhado para contratos e schemas reutilizáveis entre camadas.
+- NestJS 11
+- Prisma
+- PostgreSQL
+- JWT (access token + refresh token)
+- Zod (validação de DTOs)
 
-## Endpoints Base
+## Mapa de Implementação (status real)
 
-O servidor sobe na porta `3000` por padrão e usa prefixo global `api`.
+### Fase 1 - Fundação da API
 
-Base URL local:
+- Concluído: bootstrap Nest com CORS e prefixo global `/api`.
+- Concluído: arquitetura modular (`AuthModule`, `MediaModule`, `UsersModule`, `PrismaModule`).
+- Concluído: Prisma global injetado para acesso ao banco.
+
+### Fase 2 - Autenticação
+
+- Concluído: `POST /api/auth/register`.
+- Concluído: `POST /api/auth/login`.
+- Concluído: `POST /api/auth/refresh`.
+- Concluído: `GET /api/auth/me` protegido por JWT.
+- Concluído: hash de senha com `bcryptjs`.
+- Concluído: hash do refresh token salvo no usuário.
+- Parcial: não existe endpoint dedicado de logout/revogação explícita.
+
+### Fase 3 - Mídias
+
+- Concluído: `GET /api/media` e `GET /api/media/:id`.
+- Concluído: `POST /api/media`, `PATCH /api/media/:id`, `DELETE /api/media/:id` com `JwtAuthGuard`.
+- Concluído: autorização por dono do recurso em update/delete (`createdById`).
+- Concluído: mapeamento Prisma -> contrato compartilhado (`Media`).
+
+### Fase 4 - Contratos e validação
+
+- Concluído: uso dos schemas compartilhados do pacote `@tato-streaming/shared`.
+- Concluído: `ZodValidationPipe` para body/params nos endpoints.
+- Concluído: DTOs tipados com reexport de tipos do shared.
+
+### Fase 5 - Qualidade
+
+- Parcial: estrutura de testes está presente (Jest unit + e2e).
+- Pendente: testes de domínio de auth/media ainda não cobrem fluxos reais (arquivos atuais são boilerplate de `Hello World`).
+
+## Endpoints principais
+
+Base local:
 
 ```text
 http://localhost:3000/api
 ```
 
-Principais rotas:
-
+Rotas:
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/auth/refresh`
@@ -37,30 +73,18 @@ Principais rotas:
 - `PATCH /api/media/:id`
 - `DELETE /api/media/:id`
 
-## Stack
-
-- NestJS 11
-- Prisma
-- PostgreSQL
-- JWT (access + refresh token)
-- Zod (validação de DTOs)
-
 ## Requisitos
 
-- Node.js 20+ (recomendado)
-- npm 10+ (recomendado)
-- PostgreSQL acessível (local, Docker ou nuvem)
+- Node.js 20+
+- npm 10+
+- PostgreSQL disponível
 
-## Setup Passo a Passo
+## Setup Local
 
 ### 1) Build do pacote shared
 
-Este backend declara dependência local para `@tato-streaming/shared` usando `file:../shared`.
-
-No terminal, a partir da pasta raiz do workspace (`tato-streaming`):
-
 ```bash
-cd shared
+cd ../shared
 npm install
 npm run build
 ```
@@ -72,7 +96,7 @@ cd ../back/tatoStreaming-back
 npm install
 ```
 
-### 3) Configurar variáveis de ambiente
+### 3) Configurar ambiente
 
 Copie o arquivo de exemplo:
 
@@ -80,13 +104,13 @@ Copie o arquivo de exemplo:
 cp .env.example .env
 ```
 
-No Windows PowerShell, alternativa:
+PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Valores esperados em `.env`:
+Exemplo:
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/tato_streaming?schema=public"
@@ -95,78 +119,43 @@ JWT_REFRESH_SECRET="troque_para_um_refresh_segredo_forte"
 PORT=3000
 ```
 
-### 4) Preparar banco com Prisma
+### 4) Prisma
 
 ```bash
 npm run prisma:generate
 npm run prisma:migrate
 ```
 
-Opcional para inspecionar dados:
+Opcional:
 
 ```bash
 npm run prisma:studio
 ```
 
-### 5) Rodar a API
+### 5) Rodar API
 
 ```bash
 npm run start:dev
 ```
 
-## Setup do Banco com Docker
+## Banco via Docker
 
-Se preferir não instalar PostgreSQL diretamente na máquina, use o Docker Compose deste repositório.
-
-Arquivo:
-
-- `docker-compose.yml`
-
-### 1) Subir PostgreSQL
-
-Na pasta `back/tatoStreaming-back`:
+Arquivo: `docker-compose.yml`
 
 ```bash
 docker-compose up -d
 ```
 
-### 2) Confirmar variavel `DATABASE_URL`
-
-No arquivo `.env`, use:
-
-```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/tato_streaming?schema=public"
-```
-
-### 3) Rodar Prisma
-
-```bash
-npm run prisma:generate
-npm run prisma:migrate
-npm run prisma:studio
-```
-
 Comandos úteis:
+- `docker-compose down`
+- `docker-compose logs -f postgres`
+- `docker-compose down -v`
 
-- Parar o banco: `docker-compose down`
-- Ver logs: `docker-compose logs -f postgres`
-- Reset completo (apaga dados do volume): `docker-compose down -v`
+## Scripts
 
-## Scripts Principais
-
-- `npm run start:dev`: sobe API com watch.
-- `npm run start`: sobe API em modo padrao.
-- `npm run build`: gera dist para producao.
-- `npm run start:prod`: executa build em producao.
-- `npm run lint`: executa lint com correcao.
-- `npm run test`: testes unitarios.
-- `npm run test:e2e`: testes end-to-end.
-
-## Integração com as Outras Partes
-
-- O frontend deve apontar para este backend via `VITE_API_BASE_URL`.
-- O pacote shared concentra contratos para evitar divergência entre payloads e validacoes.
-- Ordem recomendada para desenvolvimento local:
-  1. `shared` (build)
-  2. `back` (API + banco)
-  3. `front` (UI)
+- `npm run start:dev`
+- `npm run build`
+- `npm run start:prod`
+- `npm run lint`
+- `npm run test`
+- `npm run test:e2e`
