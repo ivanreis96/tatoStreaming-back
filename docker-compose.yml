@@ -11,6 +11,14 @@ services:
       - "5432:5432"
     volumes:
       - tato_postgres_data:/var/lib/postgresql/data
+  
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: tato_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # UI Web
 
 volumes:
   tato_postgres_data:
